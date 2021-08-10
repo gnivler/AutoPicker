@@ -8,7 +8,7 @@ namespace AutoPicker
     {
         public const string PluginGUID = "C2AB543C-BF77-4853-AB76-662D422D3B6B";
         public const string PluginName = "AutoPicker";
-        public const string PluginVersion = "1.0.0";
+        public const string PluginVersion = "1.0.2";
 
         internal static void L(object input)
         {

@@ -1,5 +1,8 @@
+using System;
+using System.Runtime.InteropServices;
 using BepInEx.Bootstrap;
 using HarmonyLib;
+using UnityEngine;
 
 namespace AutoPicker
 {

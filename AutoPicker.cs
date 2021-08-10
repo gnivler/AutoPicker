@@ -1,3 +1,4 @@
+using System;
 using BepInEx;
 using BepInEx.Configuration;
 using HarmonyLib;
@@ -11,26 +12,31 @@ namespace AutoPicker
             AccessTools.FieldRefAccess<Pickable, bool>("m_picked");
 
         internal static PluginInfo PluginInfo;
+        private static readonly System.Random Rng = new();
 
         private void Awake()
         {
-            InvokeRepeating(nameof(CheckAndPick), 1, 0.1f);
+            InvokeRepeating(nameof(CheckAndPick), (float)Rng.NextDouble() * 2, 0.2f);
         }
 
         private void CheckAndPick()
         {
-            var pickable = GetComponentInChildren<Pickable>();
             if (Player.m_localPlayer is not null
-                && !m_picked(pickable)
-                && Vector3.Distance(transform.position, Player.m_localPlayer.transform.position) < 1.5f)
+                && (transform.position - Player.m_localPlayer.transform.position).sqrMagnitude < 4)
             {
-                if (PluginInfo.Instance.Config.TryGetEntry(new ConfigDefinition("General", "AutoPickupBlockList"), out ConfigEntry<string> config)
+                var pickable = GetComponentInChildren<Pickable>();
+                if (m_picked(pickable))
+                {
+                    return;
+                }
+
+                if (PluginInfo?.Instance is not null
+                    && PluginInfo.Instance.Config.TryGetEntry(new ConfigDefinition("General", "AutoPickupBlockList"), out ConfigEntry<string> config)
                     && !config.Value.Contains(pickable.m_itemPrefab.name))
                 {
                     pickable.Interact(Player.m_localPlayer, false);
                 }
-
-                if (string.IsNullOrEmpty(config.Value))
+                else if (PluginInfo?.Instance is null)
                 {
                     pickable.Interact(Player.m_localPlayer, false);
                 }
