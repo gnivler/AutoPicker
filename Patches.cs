@@ -35,22 +35,22 @@ namespace AutoPicker
                 }
             }
         }
-    }
 
-    // remove 0.5s hardcoded delay on item spawning before pickup is allowed
-    [HarmonyPatch(typeof(ItemDrop), "CanPickup")]
-    public static class ItemDropCanPickupPatch
-    {
-        public static bool Prefix(ZNetView ___m_nview, ref bool __result)
+        // remove 0.5s hardcoded delay on item spawning before pickup is allowed
+        [HarmonyPatch(typeof(ItemDrop), "CanPickup")]
+        public static class ItemDropCanPickupPatch
         {
-            if (___m_nview == null || !___m_nview.IsValid())
+            public static bool Prefix(ZNetView ___m_nview, ref bool __result)
             {
-                __result = true;
+                if (___m_nview == null || !___m_nview.IsValid())
+                {
+                    __result = true;
+                    return false;
+                }
+
+                __result = ___m_nview.IsOwner();
                 return false;
             }
-
-            __result = ___m_nview.IsOwner();
-            return false;
         }
     }
 }
