@@ -1,6 +1,4 @@
 using System;
-using System.Runtime.InteropServices;
-using BepInEx.Bootstrap;
 using HarmonyLib;
 using UnityEngine;
 
@@ -18,31 +16,41 @@ namespace AutoPicker
             }
         }
 
-        // try once to retrieve the config when it will be present
-        [HarmonyPatch(typeof(Hud), "Awake")]
-        public class HudAwakePatch
+
+        [HarmonyPatch(typeof(Localization), "Initialize")]
+        public static class LocalizationInitialize
         {
             public static void Postfix()
             {
-                Chainloader.PluginInfos.TryGetValue("RagnarsRokare.AutoPickupSelector", out AutoPicker.PluginInfo);
+                foreach (var item in Resources.FindObjectsOfTypeAll<Pickable>())
+                {
+                    try
+                    {
+                        Mod.ConfigFile.Bind("Items", Localization.instance.Localize(item.GetHoverName()), true);
+                    }
+                    catch (Exception ex)
+                    {
+                        Mod.L(ex);
+                    }
+                }
             }
         }
+    }
 
-        // remove 0.5s hardcoded delay on item spawning before pickup is allowed
-        [HarmonyPatch(typeof(ItemDrop), "CanPickup")]
-        public static class ItemDropCanPickupPatch
+    // remove 0.5s hardcoded delay on item spawning before pickup is allowed
+    [HarmonyPatch(typeof(ItemDrop), "CanPickup")]
+    public static class ItemDropCanPickupPatch
+    {
+        public static bool Prefix(ZNetView ___m_nview, ref bool __result)
         {
-            public static bool Prefix(ZNetView ___m_nview, ref bool __result)
+            if (___m_nview == null || !___m_nview.IsValid())
             {
-                if (___m_nview == null || !___m_nview.IsValid())
-                {
-                    __result = true;
-                    return false;
-                }
-
-                __result = ___m_nview.IsOwner();
+                __result = true;
                 return false;
             }
+
+            __result = ___m_nview.IsOwner();
+            return false;
         }
     }
 }
