@@ -16,9 +16,9 @@ namespace AutoPicker
             }
         }
 
-
+        // build config list of Pickables at init
         [HarmonyPatch(typeof(Localization), "Initialize")]
-        public static class LocalizationInitialize
+        public static class LocalizationInitializePatch
         {
             public static void Postfix()
             {
