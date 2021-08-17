@@ -17,16 +17,16 @@ namespace AutoPicker
         }
 
         // build config list of Pickables at init
-        [HarmonyPatch(typeof(Localization), "Initialize")]
-        public static class LocalizationInitializePatch
+        [HarmonyPatch(typeof(ObjectDB), "Awake")]
+        public static class ObjectDBAwakePatch
         {
             public static void Postfix()
             {
-                foreach (var item in Resources.FindObjectsOfTypeAll<Pickable>())
+                foreach (var pickable in Resources.FindObjectsOfTypeAll<Pickable>())
                 {
                     try
                     {
-                        Mod.ConfigFile.Bind("Items", Localization.instance.Localize(item.GetHoverName()), true);
+                        Mod.ConfigFile.Bind("Items", Localization.instance.Localize(pickable.GetHoverName()), true);
                     }
                     catch (Exception ex)
                     {
